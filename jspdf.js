@@ -148,6 +148,9 @@ var jsPDF = (function (global) {
      */
     function jsPDF(orientation, unit, format, compressPdf) {
         var options = {};
+        var _this = this;
+
+        _this.fontmap = {};  // mapping structure fontName > fontStyle > font key - performance layer. See addFont()
 
         if (typeof orientation === 'object') {
             options = orientation;
@@ -174,7 +177,6 @@ var jsPDF = (function (global) {
             outToPages = !1,  // switches where out() prints. outToPages true = push to pages obj. outToPages false = doc builder content
             offsets = [],  // List of offsets. Activated and reset by buildDocument(). Pupulated by various calls buildDocument makes.
             fonts = {},  // collection of font objects, where key is fontKey - a dynamically created label for a given font.
-            fontmap = {},  // mapping structure fontName > fontStyle > font key - performance layer. See addFont()
             activeFontKey,      // will be string representing the KEY of the font as combination of fontName + fontStyle
             k,                  // Scale factor
             tmp,
@@ -385,10 +387,10 @@ var jsPDF = (function (global) {
                 // this is mapping structure for quick font key lookup.
                 // returns the KEY of the font (ex: "F1") for a given
                 // pair of font name and type (ex: "Arial". "Italic")
-                if (!fontmap.hasOwnProperty(fontName)) {
-                    fontmap[fontName] = {};
+                if (!_this.fontmap.hasOwnProperty(fontName)) {
+                    _this.fontmap[fontName] = {};
                 }
-                fontmap[fontName][fontStyle] = fontKey;
+                _this.fontmap[fontName][fontStyle] = fontKey;
             },
             /**
              * FontObject describes a particular font as member of an instnace of jsPDF
@@ -457,7 +459,7 @@ var jsPDF = (function (global) {
                     var parts = standardFonts[i][0].split('-');
                     addToFontDictionary(fontKey, parts[0], parts[1] || '');
                 }
-                events.publish('addFonts', {fonts: fonts, dictionary: fontmap});
+                events.publish('addFonts', {fonts: fonts, dictionary: _this.fontmap});
             },
             SAFE = function __safeCall(fn) {
                 fn.foo = function __safeCallWrapper() {
@@ -802,10 +804,7 @@ var jsPDF = (function (global) {
                 fontName = fontName !== undefined ? fontName : fonts[activeFontKey].fontName;
                 fontStyle = fontStyle !== undefined ? fontStyle : fonts[activeFontKey].fontStyle;
 
-			if (fontName !== undefined){
-				fontName = fontName.toLowerCase();
-			}
-			switch(fontName){
+			switch(fontName.toLowerCase()){
 			case 'sans-serif':
 			case 'verdana':
 			case 'arial':
@@ -821,23 +820,30 @@ var jsPDF = (function (global) {
 			case 'serif':
 			case 'cursive':
 			case 'fantasy':
-				default:
 				fontName = 'times';
 				break;
 			}
 
                 try {
                     // get a string like 'F3' - the KEY corresponding tot he font + type combination.
-                    key = fontmap[fontName][fontStyle];
+                    key = _this.fontmap[fontName][fontStyle];
                 } catch (e) {
+                    if (fontName !== undefined){
+                      fontName = fontName.toLowerCase();
+                    }
+
+                    try {
+                        key = _this.fontmap[fontName][fontStyle];
+                    } catch (e) {
+                    }
                 }
 
                 if (!key) {
                     //throw new Error("Unable to look up font label for font '" + fontName + "', '"
                     //+ fontStyle + "'. Refer to getFontList() for available fonts.");
-                    key = fontmap['times'][fontStyle];
+                    key = _this.fontmap['times'][fontStyle];
                     if (key == null) {
-                        key = fontmap['times']['normal'];
+                        key = _this.fontmap['times']['normal'];
                     }
                 }
                 return key;
@@ -1719,11 +1725,11 @@ var jsPDF = (function (global) {
             // TODO: iterate over fonts array or return copy of fontmap instead in case more are ever added.
             var list = {}, fontName, fontStyle, tmp;
 
-            for (fontName in fontmap) {
-                if (fontmap.hasOwnProperty(fontName)) {
+            for (fontName in _this.fontmap) {
+                if (_this.fontmap.hasOwnProperty(fontName)) {
                     list[fontName] = tmp = [];
-                    for (fontStyle in fontmap[fontName]) {
-                        if (fontmap[fontName].hasOwnProperty(fontStyle)) {
+                    for (fontStyle in _this.fontmap[fontName]) {
+                        if (_this.fontmap[fontName].hasOwnProperty(fontStyle)) {
                             tmp.push(fontStyle);
                         }
                     }
