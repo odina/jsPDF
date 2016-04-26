@@ -1370,6 +1370,41 @@ var jsPDF = (function (global) {
                 return this;
             };
 
+        API.textAlign = function(txt, options, x, y) {
+            var _this = this;
+            var xPos;
+
+            txt = _this.splitTextToSize(txt, options.w);
+            options = options || {};
+
+            /* Use the options align property to specify desired text alignment
+             * Param x will be ignored if desired text alignment is 'center'.
+             * Usage of options can easily extend the function to apply different text
+             * styles and sizes
+            */
+            for(var i=0; i < txt.length; i++) {
+                var t = txt[i];
+
+                // Get current font size
+                var fontSize = _this.internal.getFontSize();
+
+                // Get the actual text's width
+                /* You multiply the unit width of your string by your font size and divide
+                 * by the internal scale factor. The division is necessary
+                 * for the case where you use units other than 'pt' in the constructor
+                 * of jsPDF.
+                */
+                var txtWidth = _this.getStringUnitWidth(t) * fontSize / _this.internal.scaleFactor;
+                if (options.align == "center") {
+                    xPos = x + (options.w - txtWidth) / 2;
+                } else {
+                    xPos = x;
+                }
+
+                _this.text(t, xPos, y + fontSize * 1.25 * i);
+            }
+        };
+
         API.lstext = function (text, x, y, spacing) {
             for (var i = 0, len = text.length; i < len; i++, x += spacing) this.text(text[i], x, y);
         };
