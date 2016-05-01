@@ -14,8 +14,8 @@
 
     /** @preserve
      * jsPDF - PDF Document creation from JavaScript
-     * Version 1.2.62 Built on 2016-04-26T21:37:38.699Z
-     *                           CommitID 4ecf05c591
+     * Version 1.2.62 Built on 2016-05-01T13:13:28.077Z
+     *                           CommitID 48efd5b5b2
      *
      * Copyright (c) 2010-2014 James Hall <james@parall.ax>, https://github.com/MrRio/jsPDF
      *               2010 Aaron Spike, https://github.com/acspike
@@ -1361,9 +1361,11 @@
             API.textAlign = function (txt, options, x, y) {
                 var _this = this;
                 var xPos;
+                var scale;
 
                 txt = _this.splitTextToSize(txt, options.w);
                 options = options || {};
+                scale = options.lineHeightScale || 1.25;
 
                 /* Use the options align property to specify desired text alignment
                  * Param x will be ignored if desired text alignment is 'center'.
@@ -1389,7 +1391,7 @@
                         xPos = x;
                     }
 
-                    _this.text(t, xPos, y + fontSize * 1.25 * i);
+                    _this.text(t, xPos, y + fontSize * scale * i);
                 }
             };
 
@@ -2051,7 +2053,7 @@
          * pdfdoc.mymethod() // <- !!!!!!
          */
         jsPDF.API = { events: [] };
-        jsPDF.version = "1.2.62 2016-04-26T21:37:38.699Z:odina";
+        jsPDF.version = "1.2.62 2016-05-01T13:13:28.077Z:odina";
 
         if (typeof define === 'function' && define.amd) {
             define('jsPDF', function () {

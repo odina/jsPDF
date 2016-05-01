@@ -1373,9 +1373,11 @@ var jsPDF = (function (global) {
         API.textAlign = function(txt, options, x, y) {
             var _this = this;
             var xPos;
+            var scale;
 
             txt = _this.splitTextToSize(txt, options.w);
             options = options || {};
+            scale = options.lineHeightScale || 1.25;
 
             /* Use the options align property to specify desired text alignment
              * Param x will be ignored if desired text alignment is 'center'.
@@ -1401,7 +1403,7 @@ var jsPDF = (function (global) {
                     xPos = x;
                 }
 
-                _this.text(t, xPos, y + fontSize * 1.25 * i);
+                _this.text(t, xPos, y + fontSize * scale * i);
             }
         };
 
