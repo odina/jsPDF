@@ -1368,6 +1368,30 @@ var jsPDF = (function (global) {
             for (var i = 0, len = text.length; i < len; i++, x += spacing) this.text(text[i], x, y);
         };
 
+        API.lstextjustified = function (text, x, y, maxlen) {
+          var words       = text.split(' ');
+          var space       = maxlen - (this.getStringUnitWidth(text) * activeFontSize);
+          var widthSpace  = this.getCharWidthsArray(' ')[0] * activeFontSize;
+          var countSpaces = words.length-1;
+          var padSpaces   = (space + (widthSpace * countSpaces)) / countSpaces;
+
+          for (var i = 0, len = words.length; i < len; i++) {
+            var word         = words[i];
+            var widths_array = this.getCharWidthsArray(word);
+
+            for (var j = 0; j < word.length; j++) {
+                this.text(word[j], x, y);
+                x += widths_array[j] * activeFontSize;
+            }
+
+            // space after word (except last word)
+            if (i < len-1) {
+              this.text(' ', x, y);
+              x += padSpaces;
+            }
+          }
+        };
+
         API.line = function (x1, y1, x2, y2) {
             return this.lines([[x2 - x1, y2 - y1]], x1, y1);
         };
